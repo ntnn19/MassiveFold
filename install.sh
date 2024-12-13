@@ -150,7 +150,7 @@ if [[ $only_create_env == "true" ]]; then
   install_env "alphafold3"
   
   echo "Both environments installed, exiting."
-  exit 1
+  exit 0
 fi
 
 if [ "$host" == 'jean-zay' ]; then
