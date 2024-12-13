@@ -13,6 +13,8 @@ Usage: $USAGE\n\
     -s| --sequence: path of the sequence(s) to infer, should be a 'fasta' file \n\
     -r| --run: name chosen for the run to organize in outputs.\n\
     -p| --predictions_per_model: number of predictions computed for each neural network model.\n\
+        If used with -t AlphaFold3, -p is the number of seeds used. Each seed will have 5 samples predicted.\n\
+        In total, with -p n, you will have 5n predictions computed.\n\
     -f| --parameters: json file's path containing the parameters used for this run.\n\
     -t| --tool: (default: 'AFmassive') Use either AFmassive, AlphaFold3 or ColabFold in structure prediction for MassiveFold\n\
 \n\
@@ -323,11 +325,12 @@ elif eval $conditions_to_align; then
 elif [[ $tool == "AFmassive" ]] && [[ -d  $msas_precomputed/msas ]]; then
   echo "$msas_precomputed are valid."
   echo "Using AFmassive"
-  mkdir -p ${output_dir}/${sequence_name}/
+  mkdir -p ${output_dir}/${sequence_name}
   ln -s $(realpath $msas_precomputed/msas) ${output_dir}/${sequence_name}/
 elif [[ $tool == "AlphaFold3" ]] && [[ -f  $msas_precomputed/msas_alphafold3/msas_alphafold3_data.json ]]; then
   echo "$msas_precomputed are valid."
   echo "Using AlphaFold3"
+  mkdir -p ${output_dir}/${sequence_name}/${run_name}
   ./${scripts_dir}/unifier.py \
     --conversion input_inference \
     --to_convert $msas_precomputed/msas_alphafold3/msas_alphafold3_data.json \

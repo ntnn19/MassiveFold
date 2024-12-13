@@ -315,7 +315,10 @@ git clone https://github.com/GBLille/MassiveFold.git
 ./install.sh
 ```
 
-To use AlphaFold3, copy your weights to the `~/af3_datadir` directory.
+To use AlphaFold3, copy your weights to the `~/af3_datadir` directory and run the following command:
+```bash
+ln -s /gpfsdsdir/dataset/Alphafold3/* ~/af3_datadir/
+```
 
 The same [file architecture](#tree) is built, follow the [usage](#usage) section to use MassiveFold.
 
@@ -390,7 +393,7 @@ Activate the conda environment, then launch MassiveFold.
 conda activate massivefold
 ./run_massivefold.sh -s <SEQUENCE_PATH> -r <RUN_NAME> -p <NUMBER_OF_PREDICTIONS_PER_MODEL> -f <JSON_PARAMETERS_FILE> -t <TOOL> 
 ```
-**N.B.**: on the Jean Zay cluster, load the massivefold module instead of activating the conda environment
+**N.B.**: on the Jean Zay cluster, load the massivefold module instead of activating the conda environment; first load the module arch/a100 to be able to load massivefold/1.3.* and run AlphaFold3 on A100.
 
 Example for AFmassive:
 ```bash
@@ -411,13 +414,16 @@ For more help and list of required and facultative parameters, run:
 ```
 Here is the help message given by this command:
 ```txt
-Usage: ./run_massivefold.sh -s str -r str -p int -f str [-t str] [ -b int | [[-C str | -c] [-w int]] ] [-m str] [-n str] [-a] [-o]
+Usage: ./run_massivefold.sh -s str -r str -p int -f str -t str [ -b int | [[-C str | -c] [-w int]] ] [-m str] [-n str] [-a] [-o]
 ./run_massivefold.sh -h for more details 
   Required arguments:
     -s| --sequence: path of the sequence(s) to infer, should be a 'fasta' file 
     -r| --run: name chosen for the run to organize in outputs.
     -p| --predictions_per_model: number of predictions computed for each neural network model.
+        If used with -t AlphaFold3, -p is the number of seeds used. Each seed will have 5 samples predicted.
+        In total, with -p n, you will have 5n predictions computed.
     -f| --parameters: json file's path containing the parameters used for this run.
+    -t| --tool: (default: 'AFmassive') Use either AFmassive, AlphaFold3 or ColabFold in structure prediction for MassiveFold
 
   Facultative arguments:
     -b| --batch_size: (default: 25) number of predictions per batch, should not be higher than -p.
@@ -428,13 +434,13 @@ Usage: ./run_massivefold.sh -s str -r str -p int -f str [-t str] [ -b int | [[-C
     -j| --jobid: jobid of an alignment job to wait for inference, skips the alignments.
 
   Facultative options:
-    -t| --tool_to_use: (default: 'AFmassive') Use either AFmassive or ColabFold in structure prediction for MassiveFold
     -o| --only_msas: only compute alignments, the first step of MassiveFold
     -c| --calibrate: calibrate --batch_size value. Searches from the previous runs for the same 'fasta' path given
         in --sequence and uses the longest prediction time found to compute the maximal number of predictions per batch.
         This maximal number depends on the total time given by --wall_time.
     -a| --recompute_msas: purges previous alignment step and recomputes msas.
 ```
+
 ### Inference workflow
 
 It launches MassiveFold with the same parameters introduced above but instead of running AFmassive or ColabFold a single 
