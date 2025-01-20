@@ -13,27 +13,30 @@ uniref_database=$uniref_database
 container_path=$container_path
 weights_dir=$weights_dir
 cwd=$cwd
+echo "Current working directory: $$(pwd)"
+echo "TMPDIR: $$TMPDIR"
+cd $$cwd
+echo "Current working directory: $$(pwd)"
+echo "TMPDIR: $$TMPDIR"
 
 if [ -z "$$uniref_database" ]; then
   echo "No specified path for uniref30, use default ${data_dir}/uniref30/UniRef30_2021_03"
   uniref_database=$${data_dir}/uniref30/UniRef30_2021_03
 fi
 
-echo "OUTPUT_DIR="
-echo ${output_dir}
-echo $$(realpath ${output_dir})
-
 output_dir=$$(realpath ${output_dir})
+echo "OUTPUT_DIR $${output_dir}"
 output_path="$${output_dir}/$${sequence_name}/$${run_name}/batch_$${SLURM_ARRAY_TASK_ID}"
 echo output_path is $$output_path
 mkdir -vp $${output_path}/$${sequence_name}
 ln -s $${output_dir}/$${sequence_name}/msas $${output_path}/$${sequence_name}
 
-#singularity run --no-home -B $${output_dir}:$${output_dir} $${container_path} bash -c "
-#  echo output_path is $${output_path}
-#  mkdir -vp $${output_path}/$${sequence_name}
-#  ln -s $${output_dir}/$${sequence_name}/msas $output_path/$${sequence_name}
-#
+#output_dir=$$(basename ${output_dir})
+#echo "OUTPUT_DIR $${output_dir}"
+#output_path="./$${output_dir}/$${sequence_name}/$${run_name}/batch_$${SLURM_ARRAY_TASK_ID}"
+#echo output_path is $$output_path
+#mkdir -vp $${output_path}/$${sequence_name}
+#ln -s $${output_dir}/$${sequence_name}/msas $${output_path}/$${sequence_name}
 
 # fixed variables
 use_precomputed_msas=true
@@ -59,12 +62,39 @@ max_score=$max_score
 stop_recycling_below=$stop_recycling_below
 
 # parameters for each task in the job array
-batches_path=${logs_dir}/${sequence_name}/${run_name}/$${sequence_name}_$${run_name}_batches.json
-batch_model=$$($${scripts_dir}/get_batch.py --batch_id $$SLURM_ARRAY_TASK_ID --json_path $${batches_path} --element model)
-batch_start=$$($${scripts_dir}/get_batch.py --batch_id $$SLURM_ARRAY_TASK_ID --json_path $${batches_path} --element start)
-batch_end=$$($${scripts_dir}/get_batch.py --batch_id $$SLURM_ARRAY_TASK_ID --json_path $${batches_path} --element end)
+batch_vars=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs \
+    --env SLURM_ARRAY_TASK_ID=$${SLURM_ARRAY_TASK_ID} \
+    --env sequence_name=$${sequence_name} \
+    --env run_name=$${run_name} \
+    --env scripts_dir=$${scripts_dir} \
+    $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold &&
+    set -e  # Exit on errors for debugging
+    echo "Running inside container..."
+
+    # Check if environment variables are set correctly
+    echo "sequence_name=$${sequence_name}"
+    echo "run_name=$${run_name}"
+    echo "SLURM_ARRAY_TASK_ID=$${SLURM_ARRAY_TASK_ID}"
+
+    batches_path="${logs_dir}/${sequence_name}/${run_name}/$${sequence_name}_$${run_name}_batches.json"
+    echo "batches_path=$${batches_path}"
+
+    batch_model=$$($${scripts_dir}/get_batch.py --batch_id $$SLURM_ARRAY_TASK_ID --json_path $${batches_path} --element model || echo "ERROR")
+    batch_start=$$($${scripts_dir}/get_batch.py --batch_id $$SLURM_ARRAY_TASK_ID --json_path $${batches_path} --element start || echo "ERROR")
+    batch_end=$$($${scripts_dir}/get_batch.py --batch_id $$SLURM_ARRAY_TASK_ID --json_path $${batches_path} --element end || echo "ERROR")
+
+    echo "batch_model=$${batch_model}"
+    echo "batch_start=$${batch_start}"
+    echo "batch_end=$${batch_end}"   
+' | tee batch_variables.txt)  # Save output to a file
+
+# Read values from the file to use them in the host environment
+batch_model=$$(awk -F= '/batch_model/ {print $$2}' batch_variables.txt)
+batch_start=$$(awk -F= '/batch_start/ {print $$2}' batch_variables.txt)
+batch_end=$$(awk -F= '/batch_end/ {print $$2}' batch_variables.txt)
 
 echo Model used is $$batch_model, batch computed between prediction $$batch_start and $$batch_end
+echo TASK_ID $$SLURM_ARRAY_TASK_ID json_path $${batches_path}
 
 echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${uniref_database}:$${uniref_database} -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && $${run_massivefold}
     --fasta_paths=$${fafile}
@@ -103,7 +133,7 @@ echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${uniref_da
     --uniprot_database_path=$${data_dir}/uniprot/uniprot.fasta'
 "
 
-time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${uniref_database}:$${uniref_database} -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && $${run_massivefold} \
+time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${uniref_database}:$${uniref_database} -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs -B $$(pwd)/output:/app/massivefold_runs/output -B $$(pwd)/run_AFmassive.py:/usr/local/envs/massivefold/bin/run_AFmassive.py $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && $${run_massivefold} \
     --fasta_paths=$${fafile} \
     --output_dir=$${output_path} \
     --data_dir=$${weights_dir} \
@@ -137,6 +167,6 @@ time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${uniref_dat
     --bfd_database_path=$${data_dir}/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt \
     --pdb_seqres_database_path=$${data_dir}/pdb_seqres/pdb_seqres.txt \
     --uniref30_database_path=$${uniref_database}/UniRef30_2023_02 \
-    --uniprot_database_path=$${data_dir}/uniprot/uniprot.fasta
+    --uniprot_database_path=$${data_dir}/uniprot/uniprot.fasta"
     
 date
