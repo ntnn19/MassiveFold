@@ -1,0 +1,24 @@
+{
+    "massivefold": {
+        "run_massivefold": "run_alphafold.py",
+        "run_massivefold_plots": "massivefold_plots.py",
+        "data_dir": "/gpfs/cssb/group/cssb-topf/natan/af3db",
+        "jobfile_headers_dir": "./headers",
+        "jobfile_templates_dir": "../massivefold/parallelization/templates",
+        "scripts_dir": "../massivefold/parallelization",
+        "output_dir": "./output",
+        "logs_dir": "./log",
+        "input_dir": "./input",
+        "pkl_format": "full"
+    },
+    "custom_params": {},
+    "AF3_run": {
+        "entities": ["A","B"],
+        "model_preset": "multimer",
+        "max_template_date": "2024-11-28"
+    },
+    "plots": {
+        "MF_plots_top_n_predictions": "10",
+        "MF_plots_chosen_plots": "DM_plddt_PAE,CF_PAEs"
+    }
+}

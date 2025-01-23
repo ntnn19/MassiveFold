@@ -9,7 +9,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_enum(
   "job_type",
   'all',
-  ['all', 'alignment', 'jobarray', 'post_treatment'],
+  ['all', 'alignment', 'jobarray', 'post_treatment','parallel'],
   'Type of the jobfile to create')
 flags.DEFINE_string(
   "sequence_name",
@@ -21,6 +21,7 @@ flags.DEFINE_string(
   'name of the run, it can be anything and it will'
   'be the name of the output directory under the sequence name.')
 flags.DEFINE_bool("create_files", True, '')
+flags.DEFINE_bool("parallel", False, '')
 flags.DEFINE_string(
   "path_to_parameters",
   "",
@@ -33,14 +34,24 @@ flags.DEFINE_enum(
 
 def create_single_jobfile(jobfile_type, templates:dict, params, json_params: str):
   params["json_params"] = json_params
-  jobfile = Template(templates[jobfile_type]).substitute(params)
+  print("json_params=",params)
+  # Substitute parameters into the template
+  jobfile_template = Template(templates[jobfile_type])
+# print(f"Template before substitution: {jobfile_template.template}")
+
+  # Perform substitution
+  jobfile = jobfile_template.substitute(params)
+
+  # Print the final jobfile content after substitution
+#  print(f"Generated jobfile: {jobfile}")
+  #jobfile = Template(templates[jobfile_type]).substitute(params)
   if FLAGS.create_files:
     with open(f"{FLAGS.sequence_name}_{FLAGS.run_name}_{jobfile_type}.slurm", 'w') as slurm_job:
       slurm_job.write(jobfile)
   return jobfile
 
 def create_all_jobfile(templates:dict, params:dict, json_params: str):
-  for jobtype in ['alignment', 'jobarray', 'post_treatment']:
+  for jobtype in ['alignment', 'jobarray', 'post_treatment','parallel']:
     create_single_jobfile(jobtype, templates, params, json_params)
 
 def group_templates(all_params, job_types:list):
@@ -84,6 +95,10 @@ def main(argv):
       'sequence_name': FLAGS.sequence_name,
       'substitute_batch_number': list(batches.keys())[-1]
     }
+  if FLAGS.parallel:
+      with open(f'{FLAGS.sequence_name}_{FLAGS.run_name}_jobs_per_node.json', 'r') as json_paralle_batches:
+          paralle_batches = json.load(json_paralle_batches)
+          run_params['substitute_parallel_batch_number']=len(list(paralle_batches.keys()))
 
   # parameters parsing, computing and display
   if not FLAGS.path_to_parameters:
