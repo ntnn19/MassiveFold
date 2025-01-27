@@ -23,10 +23,10 @@ head -n $$NUM_GPUS $$JOB_LIST > "$${joblist_without_ext}_$${SLURM_ARRAY_TASK_ID}
 sed -i "1,$${NUM_GPUS}d" $$JOB_LIST       # Remove assigned tasks
 flock -u 9   # Unlock the file
 
-if [ ! -s "$$JOB_LIST" ]; then
-    echo "No more jobs left. Exiting."
-    exit 0
-fi
+#if [ ! -s "$${joblist_without_ext}_$${SLURM_ARRAY_TASK_ID}.txt" ]; then
+#    echo "No more jobs left. Exiting."
+#    exit 0
+#fi
 
 < "$${joblist_without_ext}_$${SLURM_ARRAY_TASK_ID}.txt" parallel -j $$NUM_GPUS 'eval CUDA_VISIBLE_DEVICES=$$(({%} - 1)) {}' 2>&1 | tee -a $${SLURM_STDOUT}
 
