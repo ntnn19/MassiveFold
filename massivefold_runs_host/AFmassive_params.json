@@ -13,7 +13,7 @@
         "output_dir": "./output",
         "logs_dir": "./log",
         "input_dir": "./input",
-        "models_to_use": "",
+        "models_to_use": "model_3_multimer_v1,model_3_multimer_v3",
         "pkl_format": "full"
     },
     "custom_params": {},

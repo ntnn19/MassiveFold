@@ -375,31 +375,52 @@ until [ -f ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}
     sleep 5
     elapsed=$((elapsed + 5))
 done
+elapsed=0
 if [ -f ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt ]; then
     echo "File ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt  found"
     cp ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt ${logs_dir}/${sequence_name}/${run_name}/bak_${sequence_name}_${run_name}_jobarray_as_joblist.txt.bak
     echo "${scripts_dir}/batching.py --sequence_name=${sequence_name} --run_name=${run_name} --predictions_per_model=${predictions_per_model} --batch_size=${batch_size} --models_to_use=${models_to_use} --path_to_parameters=${parameters_file} --tool $tool --parallel --gpu_nodes_file=gpu_nodes.txt --jobs_file=${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt"
-    ${scripts_dir}/batching.py --sequence_name=${sequence_name} --run_name=${run_name} --predictions_per_model=${predictions_per_model} --batch_size=${batch_size} --models_to_use=${models_to_use} --path_to_parameters=${parameters_file} --tool $tool --parallel --gpu_nodes_file=gpu_nodes.txt --jobs_file=${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt
+#    ${scripts_dir}/batching.py --sequence_name=${sequence_name} --run_name=${run_name} --predictions_per_model=${predictions_per_model} --batch_size=${batch_size} --models_to_use=${models_to_use} --path_to_parameters=${parameters_file} --tool $tool --parallel --gpu_nodes_file=gpu_nodes.txt --jobs_file=${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt
     echo "${scripts_dir}/create_jobfile.py --job_type=parallel --sequence_name=${sequence_name} --run_name=${run_name} --path_to_parameters=${parameters_file} --tool $tool --parallel"
     ${scripts_dir}/create_jobfile.py --job_type=parallel --sequence_name=${sequence_name} --run_name=${run_name} --path_to_parameters=${parameters_file} --tool $tool
     ARRAY_ID=$(sbatch --parsable --dependency=afterok:$AGG_ID ${sequence_name}_${run_name}_parallel.slurm)
+    # Step 1: Wait until the job list is empty (meaning the last useful job has started)
+    until [ ! -s "${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt" ]; do
+        echo "Waiting to ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt to get empty for ${elapsed} seconds"
+        sleep 10  # Adjust as needed
+        elapsed=$((elapsed + 10))
+    done
+    echo "Job list is empty. Cancelling pending jobs..."
+    scancel --state=PENDING $ARRAY_ID
+    while true; do
+        # Get the most recent COMPLETED job
+
+        LAST_RUNNING_TASK=$(sacct -j $ARRAY_ID --format=JobID,State,End --noheader | \
+        awk '$2=="COMPLETED" {print $1, $3}' | sort -k2 | head -n 1 | awk '{print $1}')
+
+
+        if [[ -n "$LAST_RUNNING_TASK" ]]; then
+            echo "Last job ($LAST_RUNNING_TASK) completed. Proceeding with post-processing."
+            break
+        fi
+    
+        echo "Still waiting for jobs to finish..."
+        sleep 10  # Adjust the sleep time as needed
+    done
 else
-    echo "Timeout reached, file not found"
+    echo "Timeout reached, file ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt  not found"
     exit 1
 fi
+    echo "Last successful task ID = $LAST_RUNNING_TASK"
 
-#
-
-# Create and start post treatment (output organization axnd plots)
-# Waiting for inference to end
 ${scripts_dir}/create_jobfile.py \
-  --job_type=post_treatment \
-  --sequence_name=${sequence_name} \
-  --run_name=${run_name} \
-  --path_to_parameters=${parameters_file} \
-  --tool $tool
+--job_type=post_treatment \
+--sequence_name=${sequence_name} \
+--run_name=${run_name} \
+--path_to_parameters=${parameters_file} \
+--tool $tool
 
-sbatch --dependency=afterok:$ARRAY_ID ${sequence_name}_${run_name}_post_treatment.slurm
+sbatch --dependency=aftercorr:$LAST_RUNNING_TASK ${sequence_name}_${run_name}_post_treatment.slurm
 
 # Store jobiles and batches elements in logs
 mkdir -p ${logs_dir}/${sequence_name}/${run_name}/
