@@ -1,8 +1,10 @@
 #!/bin/bash
 #SBATCH --time=48:00:00
-#SBATCH --output=/gpfs/cssb/group/cssb-topf/natan/tests/test_r2na/run/stdout-%x-%j.log
-#SBATCH --error=/gpfs/cssb/group/cssb-topf/natan/tests/test_r2na/run/stderr-%x-%j.log
+#SBATCH --output=${logs_dir}/${sequence_name}/${run_name}/alignment_%j.log
+#SBATCH --error=${logs_dir}/${sequence_name}/${run_name}/alignment_%j.log
 #SBATCH --partition=topfgpu
 #SBATCH --nodes=1
-#SBATCH --constraint="A100"
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=40
+#SBATCH --hint=nomultithread
 
