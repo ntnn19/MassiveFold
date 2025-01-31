@@ -7,3 +7,4 @@
 #SBATCH --error=${logs_dir}/${sequence_name}/${run_name}/jobarray_%a-%x-%j.log
 #SBATCH --output=${logs_dir}/${sequence_name}/${run_name}/jobarray_%a-%x-%j.log
 #SBATCH --array=0-$substitute_batch_number
+#SBATCH --partition=allcpu
