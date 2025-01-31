@@ -37,7 +37,7 @@ echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_
   --hmmsearch_binary_path $${hmmsearch_path}
 '"
 
-time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_tmp:/tmp -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && $${run_massivefold} \
+time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_tmp:/tmp -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && $${run_massivefold} \
   --run_data_pipeline=true \
   --run_inference=false \
   --json_path $${json_path} \
@@ -48,7 +48,7 @@ time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_t
   --hmmalign_binary_path $${hmmalign_path} \
   --hmmbuild_binary_path $${hmmbuild_path} \
   --hmmsearch_binary_path $${hmmsearch_path}
-'
+"
 date
 
 
