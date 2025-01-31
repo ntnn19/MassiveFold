@@ -25,7 +25,8 @@ json_path_dir=$$(dir $${json_path})
 
 date
 echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_tmp:/tmp -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && $${run_massivefold}
-  --norun_inference
+  --run_data_pipeline=true
+  --run_inference=false
   --json_path $${json_path}
   --db_dir $${data_dir}
   --model_dir $${weights_dir}
@@ -37,7 +38,8 @@ echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_
 '"
 
 time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}/af3_tmp:/tmp -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && $${run_massivefold} \
-  --norun_inference \
+  --run_data_pipeline=true \
+  --run_inference=false \
   --json_path $${json_path} \
   --db_dir $${data_dir} \
   --model_dir $${weights_dir} \
