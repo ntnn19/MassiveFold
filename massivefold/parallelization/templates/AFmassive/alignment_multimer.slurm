@@ -26,7 +26,7 @@ mgnify_max_hits=501
 uniprot_max_hits=50000
 uniref_max_hits=10000
 use_gpu_relax=false
-#
+
 echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${uniref_database}:$${uniref_database} -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && $${run_massivefold}
     --alignments_only=$${alignments_only} 
     --fasta_paths=$${fafile} 

@@ -21,7 +21,7 @@ flags.DEFINE_string(
   'name of the run, it can be anything and it will'
   'be the name of the output directory under the sequence name.')
 flags.DEFINE_bool("create_files", True, '')
-flags.DEFINE_bool("parallel", False, '')
+#flags.DEFINE_bool("parallel", False, '')
 flags.DEFINE_string(
   "path_to_parameters",
   "",
@@ -95,10 +95,10 @@ def main(argv):
       'sequence_name': FLAGS.sequence_name,
       'substitute_batch_number': list(batches.keys())[-1]
     }
-  if FLAGS.parallel:
-      with open(f'{FLAGS.sequence_name}_{FLAGS.run_name}_jobs_per_node.json', 'r') as json_paralle_batches:
-          paralle_batches = json.load(json_paralle_batches)
-          run_params['substitute_parallel_batch_number']=len(list(paralle_batches.keys()))
+#  if FLAGS.parallel:
+#      with open(f'{FLAGS.sequence_name}_{FLAGS.run_name}_jobs_per_node.json', 'r') as json_paralle_batches:
+#          paralle_batches = json.load(json_paralle_batches)
+#          run_params['substitute_parallel_batch_number']=len(list(paralle_batches.keys()))
 
   # parameters parsing, computing and display
   if not FLAGS.path_to_parameters:

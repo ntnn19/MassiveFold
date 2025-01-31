@@ -9,20 +9,20 @@ cwd=$cwd
 
 # rename and move files
 echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && time $${scripts_dir}/organize_outputs.py --batches_path $$output'"
-time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && $${scripts_dir}/organize_outputs.py --batches_path $$output"
+time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && time $${scripts_dir}/organize_outputs.py --batches_path $$output"
 
 # plots
 echo "Generating plots"
 
-echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && python3 $$(which $${mf_plots_path})
-        --input_path=$${output} 
+echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && python3 $${mf_plots_path}
+        --input_path=$${output}
         --top_n_predictions=$MF_plots_top_n_predictions
         --chosen_plots=$MF_plots_chosen_plots'"
 
-time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && python3 $$(which $${mf_plots_path}) \
+time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && python3 $${mf_plots_path} \
         --input_path=$${output} \
         --top_n_predictions=$MF_plots_top_n_predictions \
-        --chosen_plots=$MF_plots_chosen_plots \"
+        --chosen_plots=$MF_plots_chosen_plots"
 
 if [[ $$pkl_format == "light" ]]; then
   echo "Reducing pkl size"

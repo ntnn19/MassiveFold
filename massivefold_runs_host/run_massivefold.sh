@@ -380,14 +380,13 @@ if [ -f ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jo
     echo "File ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt  found"
     cp ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt ${logs_dir}/${sequence_name}/${run_name}/bak_${sequence_name}_${run_name}_jobarray_as_joblist.txt.bak
     echo "${scripts_dir}/batching.py --sequence_name=${sequence_name} --run_name=${run_name} --predictions_per_model=${predictions_per_model} --batch_size=${batch_size} --models_to_use=${models_to_use} --path_to_parameters=${parameters_file} --tool $tool --parallel --gpu_nodes_file=gpu_nodes.txt --jobs_file=${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt"
-#    ${scripts_dir}/batching.py --sequence_name=${sequence_name} --run_name=${run_name} --predictions_per_model=${predictions_per_model} --batch_size=${batch_size} --models_to_use=${models_to_use} --path_to_parameters=${parameters_file} --tool $tool --parallel --gpu_nodes_file=gpu_nodes.txt --jobs_file=${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt
     echo "${scripts_dir}/create_jobfile.py --job_type=parallel --sequence_name=${sequence_name} --run_name=${run_name} --path_to_parameters=${parameters_file} --tool $tool --parallel"
     ${scripts_dir}/create_jobfile.py --job_type=parallel --sequence_name=${sequence_name} --run_name=${run_name} --path_to_parameters=${parameters_file} --tool $tool
     ARRAY_ID=$(sbatch --parsable --dependency=afterok:$AGG_ID ${sequence_name}_${run_name}_parallel.slurm)
     # Step 1: Wait until the job list is empty (meaning the last useful job has started)
-    until [ ! -s "${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt" ]; do
+    until [ ! -s "${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt" ] || [ "$elapsed" -ge "$timeout" ]; do
         echo "Waiting to ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt to get empty for ${elapsed} seconds"
-        sleep 10  # Adjust as needed
+        sleep 10
         elapsed=$((elapsed + 10))
     done
     echo "Job list is empty. Cancelling pending jobs..."
@@ -405,7 +404,7 @@ if [ -f ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jo
         fi
     
         echo "Still waiting for jobs to finish..."
-        sleep 10  # Adjust the sleep time as needed
+        sleep 10
     done
 else
     echo "Timeout reached, file ${logs_dir}/${sequence_name}/${run_name}/${sequence_name}_${run_name}_jobarray_as_joblist.txt  not found"

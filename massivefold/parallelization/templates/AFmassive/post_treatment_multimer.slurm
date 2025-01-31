@@ -8,10 +8,8 @@ container_path=$container_path
 cwd=$cwd
 
 # rename and move files
-echo $$(ls -l $${output}/*/*/*.pdb | wc -l)
 echo "singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && time $${scripts_dir}/organize_outputs.py --batches_path $$output'"
-singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && time $${scripts_dir}/organize_outputs.py --batches_path $$output"
-echo $$(ls -l $${output}/*.pdb | wc -l)
+time singularity run --nv --no-home --pwd /app/massivefold_runs -B $${cwd}:/app/massivefold_runs $${container_path} bash -c "source /usr/local/etc/profile.d/conda.sh && conda activate massivefold && time $${scripts_dir}/organize_outputs.py --batches_path $$output"
 
 # plots
 echo "Generating plots"
