@@ -28,32 +28,18 @@ echo output_path is $$output_path
 mkdir -vp $${output_path}/
 
 path_to_msas=$${output_dir}/$${sequence_name}/$${run_name}/$${json_batch_input}
+jackhmmer_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which jackhmmer)
+hmmalign_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmalign)
+hmmbuild_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmbuild)
+hmmsearch_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmsearch)
+container_path=$container_path
+weights_dir=$weights_dir
+cwd=$cwd
 
 source $$(conda info --base)/etc/profile.d/conda.sh
 conda activate mf-alphafold3
 
 date
-echo "run_alphafold.py
-  --norun_data_pipeline
-  --max_template_date $${max_template_date}
-  --json_path $${path_to_msas}
-  --db_dir $${data_dir}
-  --model_dir $${data_dir}
-  --output_dir $${output_path}
-  --jackhmmer_binary_path $$(which jackhmmer)
-  --hmmalign_binary_path $$(which hmmalign)
-  --hmmbuild_binary_path $$(which hmmbuild)
-  --hmmsearch_binary_path $$(which hmmsearch)"
 
-time run_alphafold.py \
-  --norun_data_pipeline \
-  --max_template_date $${max_template_date} \
-  --json_path $${path_to_msas} \
-  --db_dir $${data_dir} \
-  --model_dir $${data_dir} \
-  --output_dir $${output_path} \
-  --jackhmmer_binary_path $$(which jackhmmer) \
-  --hmmalign_binary_path $$(which hmmalign) \
-  --hmmbuild_binary_path $$(which hmmbuild) \
-  --hmmsearch_binary_path $$(which hmmsearch)
-date
+echo "time singularity run -B $${data_dir}:$${data_dir} -B $${weights_dir}:$${weights_dir} -B $${cwd}/af3_tmp:/tmp --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && run_alphafold.py --norun_data_pipeline --max_template_date $${max_template_date} --json_path $${path_to_msas} --db_dir $${data_dir} --model_dir $${data_dir} --output_dir $${output_path} --jackhmmer_binary_path $$jackhmmer_path --hmmalign_binary_path $$hmmalign_path --hmmbuild_binary_path $$hmmbuild_path --hmmsearch_binary_path $$hmmsearch_path'" >> "${logs_dir}/${sequence_name}/${run_name}/$${sequence_name}_$${run_name}_jobarray_as_joblist.txt"
+
