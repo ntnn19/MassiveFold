@@ -12,10 +12,10 @@ scripts_dir=$scripts_dir
 container_path=$container_path
 weights_dir=$weights_dir
 cwd=$cwd
-jackhmmer_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which jackhmmer)
-hmmalign_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmalign)
-hmmbuild_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmbuild)
-hmmsearch_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmsearch)
+jackhmmer_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which jackhmmer')
+hmmalign_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmalign')
+hmmbuild_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmbuild')
+hmmsearch_path=$$(singularity exec --bind $${cwd}:/app/massivefold_runs --no-home --pwd /app/massivefold_runs $${container_path} bash -c 'source /usr/local/etc/profile.d/conda.sh && conda activate mf-alphafold3 && which hmmsearch')
 cd $$cwd
 mkdir $${cwd}/af3_tmp
 json_path=${input_dir}/alphafold3_json_requests/$${sequence_name}.json
