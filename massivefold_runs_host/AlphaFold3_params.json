@@ -1,19 +1,22 @@
 {
     "massivefold": {
+        "cwd": "/gpfs/cssb/group/cssb-topf/natan/tests/test_massive_fold/MassiveFold/massivefold_runs_host",
         "run_massivefold": "run_alphafold.py",
         "run_massivefold_plots": "massivefold_plots.py",
+        "weights_dir": "/gpfs/cssb/group/cssb-topf/natan/singularity_containers/alphafold3/weights",
+        "container_path": "/gpfs/cssb/group/cssb-topf/natan/singularity_containers/massive_fold/massive_fold_.sif",
         "data_dir": "/gpfs/cssb/group/cssb-topf/natan/af3db",
         "jobfile_headers_dir": "./headers",
         "jobfile_templates_dir": "../massivefold/parallelization/templates",
         "scripts_dir": "../massivefold/parallelization",
         "output_dir": "./output",
-        "logs_dir": "./log",
+        "logs_dir": "log",
         "input_dir": "./input",
         "pkl_format": "full"
     },
     "custom_params": {},
     "AF3_run": {
-        "entities": ["A","B"],
+        "entities": ["protein","protein"],
         "model_preset": "multimer",
         "max_template_date": "2024-11-28"
     },

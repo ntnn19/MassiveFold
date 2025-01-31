@@ -316,7 +316,9 @@ elif eval $conditions_to_align; then
   --path_to_parameters=${parameters_file} \
   --tool $tool
 
-  ALIGNMENT_ID=$(sbatch --parsable ${sequence_name}_${run_name}_alignment.slurm)
+  ALIGNMENT_ID=$(sbatch --export=${cwd} --parsable ${sequence_name}_${run_name}_alignment.slurm)
+  echo "Alignment JOB ID $ALIGNMENT_ID"
+  exit 0
   waiting_for_alignment=true
   if $only_msas; then
     mkdir -p ${logs_dir}/${sequence_name}/${run_name}/
