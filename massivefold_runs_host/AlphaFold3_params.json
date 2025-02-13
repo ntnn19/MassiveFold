@@ -1,10 +1,11 @@
 {
     "massivefold": {
         "cwd": "/gpfs/cssb/group/cssb-topf/natan/tests/test_massive_fold/MassiveFold/massivefold_runs_host",
-        "run_massivefold": "run_alphafold.py",
+        "run_massivefold": "/app/alphafold/run_alphafold.py",
         "run_massivefold_plots": "massivefold_plots.py",
         "weights_dir": "/gpfs/cssb/group/cssb-topf/natan/singularity_containers/alphafold3/weights",
-        "container_path": "/gpfs/cssb/group/cssb-topf/natan/singularity_containers/massive_fold/massive_fold_.sif",
+        "mf_container_path": "/gpfs/cssb/group/cssb-topf/natan/singularity_containers/massive_fold/massive_fold_.sif",
+        "af_container_path": "/gpfs/cssb/group/cssb-topf/natan/singularity_containers/alphafold3/alphafold3_parallel_a100_40gb_latest_template_free.sif",
         "data_dir": "/gpfs/cssb/group/cssb-topf/natan/af3db",
         "jobfile_headers_dir": "./headers",
         "jobfile_templates_dir": "../massivefold/parallelization/templates",

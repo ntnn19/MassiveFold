@@ -120,7 +120,7 @@ def get_alphafold3_batch_input(input_json: str, params_json: str, batches: str):
   output_dir = json.load(open(params_json, 'r'))["massivefold"]["output_dir"]
   batch_filename = os.path.basename(batches)
   run_name = batch_filename.replace(f"{sequence}_", "").replace("_batches.json", "")
-
+  print("output dir=", output_dir)
   batches = json.load(open(batches, 'r'))
   for batch in batches:
     starting_seed = random.randint(0, 1_000_000)
@@ -131,10 +131,11 @@ def get_alphafold3_batch_input(input_json: str, params_json: str, batches: str):
       sequence,
       run_name,
       f"af3_batch_{batch}.json")
-    #os.makedirs(os.path.dirname(alphafold3_input))
+    os.makedirs(os.path.dirname(alphafold3_input))
     batch_input_json = json.load(open(input_json, 'r'))
     batch_input_json['name'] = 'batch_' + batch
     batch_input_json['modelSeeds'] = model_seeds
+    print(input_json,f"{batch}")
     json.dump(batch_input_json, open(alphafold3_input, 'w'), indent=4)
 
 def prepare_inference(args, tool):
